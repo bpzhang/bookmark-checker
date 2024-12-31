@@ -6,6 +6,13 @@ document.getElementById('checkBookmarks').addEventListener('click', async () => 
   const currentBookmark = document.getElementById('currentBookmark');
   const checkedCount = document.getElementById('checkedCount');
   const totalCount = document.getElementById('totalCount');
+  const excludeDomainsTextarea = document.getElementById('excludeDomains');
+  
+  // 获取排除域名列表
+  const excludeDomains = excludeDomainsTextarea.value
+    .split('\n')
+    .map(domain => domain.trim())
+    .filter(domain => domain.length > 0);
   
   // 用于控制是否停止检查
   let shouldStop = false;
@@ -25,6 +32,7 @@ document.getElementById('checkBookmarks').addEventListener('click', async () => 
   results.innerHTML = '';
   let validCount = 0;
   let invalidCount = 0;
+  let excludedCount = 0;
 
   // 获取所有书签
   chrome.bookmarks.getTree(async (bookmarkTreeNodes) => {
@@ -49,7 +57,7 @@ document.getElementById('checkBookmarks').addEventListener('click', async () => 
     for (let i = 0; i < bookmarks.length; i++) {
       // 如果用户点击了停止按钮，则中断检查
       if (shouldStop) {
-        currentBookmark.textContent = `检查已停止! 有效: ${validCount}, 无效: ${invalidCount}`;
+        currentBookmark.textContent = `检查已停止! 有效: ${validCount}, 无效: ${invalidCount}, 已排除: ${excludedCount}`;
         button.disabled = false;
         button.textContent = '重新检查';
         stopButton.style.display = 'none';
@@ -57,6 +65,19 @@ document.getElementById('checkBookmarks').addEventListener('click', async () => 
       }
 
       const bookmark = bookmarks[i];
+      
+      // 检查是否在排除列表中
+      try {
+        const bookmarkUrl = new URL(bookmark.url);
+        const bookmarkDomain = bookmarkUrl.hostname;
+        if (excludeDomains.some(domain => bookmarkDomain.includes(domain))) {
+          excludedCount++;
+          checkedCount.textContent = i + 1;
+          continue;
+        }
+      } catch (e) {
+        // URL 解析错误,继续检查
+      }
       
       // 更新进度条和当前检查的书签
       const progress = ((i + 1) / bookmarks.length) * 100;
@@ -85,7 +106,7 @@ document.getElementById('checkBookmarks').addEventListener('click', async () => 
     }
 
     // 检查完成后更新状态
-    currentBookmark.textContent = `检查完成! 有效: ${validCount}, 无效: ${invalidCount}`;
+    currentBookmark.textContent = `检查完成! 有效: ${validCount}, 无效: ${invalidCount}, 已排除: ${excludedCount}`;
     button.disabled = false;
     button.textContent = '重新检查';
     stopButton.style.display = 'none';

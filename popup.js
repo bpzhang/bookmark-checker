@@ -18,6 +18,8 @@ document.getElementById('checkBookmarks').addEventListener('click', async () => 
   const button = document.getElementById('checkBookmarks');
   const stopButton = document.getElementById('stopButton');
   const results = document.getElementById('results');
+  const invalidSection = document.querySelector('.invalid-bookmarks-section');
+  const invalidList = document.getElementById('invalidList');
   const excludeDomains = document.getElementById('excludeDomains').value
     .split('\n')
     .map(domain => domain.trim())
@@ -25,6 +27,12 @@ document.getElementById('checkBookmarks').addEventListener('click', async () => 
 
   // 清空之前的结果
   results.innerHTML = '';
+  invalidList.innerHTML = '';
+  invalidSection.style.display = 'none';
+  
+  // 重置停止按钮状态
+  stopButton.disabled = false;
+  stopButton.textContent = '停止检查';
   
   button.disabled = true;
   button.textContent = '检查中...';
@@ -67,12 +75,19 @@ function updateUI(response) {
   const currentBookmark = document.getElementById('currentBookmark');
   const checkedCount = document.getElementById('checkedCount');
   const totalCount = document.getElementById('totalCount');
+  
+  // 更新统计数据
+  document.getElementById('validCount').textContent = progress.validCount;
+  document.getElementById('invalidCount').textContent = progress.invalidCount;
+  document.getElementById('excludedCount').textContent = progress.excludedCount;
 
   if (!isChecking) {
     clearInterval(updateInterval);
     button.disabled = false;
     button.textContent = '重新检查';
     stopButton.style.display = 'none';
+    stopButton.disabled = false;
+    stopButton.textContent = '停止检查';
   }
 
   // 更新进度
@@ -80,9 +95,16 @@ function updateUI(response) {
   progressBar.style.width = `${percent}%`;
   checkedCount.textContent = progress.checked;
   totalCount.textContent = progress.total;
-  currentBookmark.textContent = progress.currentBookmark ? 
-    `正在检查: ${progress.currentBookmark}` : 
-    `检查完成! 有效: ${progress.validCount}, 无效: ${progress.invalidCount}, 已排除: ${progress.excludedCount}`;
+  
+  // 更新当前检查状态
+  if (progress.currentBookmark) {
+    currentBookmark.textContent = `正在检查: ${progress.currentBookmark}`;
+  } else if (!isChecking && progress.checked > 0) {
+    currentBookmark.innerHTML = `检查完成!<br>
+      <span style="color: #4CAF50;">✓ 有效: ${progress.validCount}</span> | 
+      <span style="color: #f44336;">✗ 无效: ${progress.invalidCount}</span> | 
+      <span style="color: #2196F3;">⊘ 已排除: ${progress.excludedCount}</span>`;
+  }
 
   // 更新结果列表
   while (progress.results.length > 0) {

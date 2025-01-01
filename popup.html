@@ -164,6 +164,34 @@
     .delete-button:hover {
       background-color: #ff1744;
     }
+    .stats-details {
+      display: flex;
+      justify-content: space-around;
+      margin: 10px 0;
+      padding: 5px;
+      background: #f5f5f5;
+      border-radius: 4px;
+    }
+    .stat-item {
+      text-align: center;
+      font-size: 12px;
+    }
+    .stat-label {
+      color: #666;
+      margin-right: 5px;
+    }
+    .stat-value {
+      font-weight: bold;
+    }
+    .stat-value.good {
+      color: #4CAF50;
+    }
+    .stat-value.bad {
+      color: #f44336;
+    }
+    .stat-value.neutral {
+      color: #2196F3;
+    }
   </style>
 </head>
 <body>
@@ -175,6 +203,20 @@
   <button id="stopButton">停止检查</button>
   <div class="stats">
     已检查: <span id="checkedCount">0</span> / <span id="totalCount">0</span>
+  </div>
+  <div class="stats-details">
+    <div class="stat-item">
+      <span class="stat-label">有效:</span>
+      <span id="validCount" class="stat-value good">0</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-label">无效:</span>
+      <span id="invalidCount" class="stat-value bad">0</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-label">已排除:</span>
+      <span id="excludedCount" class="stat-value neutral">0</span>
+    </div>
   </div>
   <div class="progress-bar">
     <div class="progress-bar-fill"></div>

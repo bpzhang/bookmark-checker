@@ -17,10 +17,11 @@ let checkingStatus = {
 // 监听来自 popup 的消息
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'startChecking') {
-    if (!checkingStatus.isChecking) {
-      checkingStatus.isChecking = true;
-      checkingStatus.shouldStop = false;
-      checkingStatus.progress = {
+    // 完全重置检查状态
+    checkingStatus = {
+      isChecking: true,
+      shouldStop: false,
+      progress: {
         checked: 0,
         total: 0,
         validCount: 0,
@@ -29,9 +30,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         currentBookmark: '',
         results: [],
         lastResults: []
-      };
-      Promise.resolve().then(() => startBookmarkCheck(request.excludeDomains));
-    }
+      }
+    };
+    Promise.resolve().then(() => startBookmarkCheck(request.excludeDomains));
     sendResponse({ status: 'started', progress: checkingStatus.progress });
   } else if (request.action === 'stopChecking') {
     checkingStatus.shouldStop = true;

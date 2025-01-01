@@ -186,62 +186,69 @@ async function checkBookmark(bookmark) {
       
       clearTimeout(getTimeoutId);
       
-      if (getResponse.ok) {
-        return { isValid: true, status: 'GET: ' + getResponse.status };
+      // 处理各种状态码
+      switch (true) {
+        case getResponse.ok:
+          return { isValid: true, status: 'GET: ' + getResponse.status };
+          
+        case [401, 403].includes(getResponse.status):
+          return { isValid: true, status: `Requires auth: ${getResponse.status}` };
+          
+        case getResponse.status === 404:
+          return { isValid: false, status: '404 Not Found' };
+          
+        case getResponse.status === 429:
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          return { isValid: true, status: 'Rate limited: 429' };
+          
+        case getResponse.status >= 500:
+          return { isValid: true, status: `Server error: ${getResponse.status}` };
+          
+        case [301, 302, 303, 307, 308].includes(getResponse.status):
+          // 处理重定向
+          if (getResponse.headers.get('location')) {
+            return { isValid: true, status: `Redirect: ${getResponse.status}` };
+          }
+          return { isValid: false, status: `Invalid redirect: ${getResponse.status}` };
+          
+        default:
+          return { isValid: false, status: `Unexpected status: ${getResponse.status}` };
       }
-
-      // 特殊状态码处理
-      if (getResponse.status === 403 || getResponse.status === 401) {
-        // 需要认证的页面通常是有效的
-        return { isValid: true, status: `Requires auth: ${getResponse.status}` };
-      }
-      
-      if (getResponse.status === 404) {
-        return { isValid: false, status: '404 Not Found' };
-      }
-      
-      if (getResponse.status === 429) {
-        // 请求过多，等待一会儿再试
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        return { isValid: true, status: 'Rate limited: 429' };
-      }
-
-      // 其他错误状态码，但可能是有效网站
-      if (getResponse.status >= 500) {
-        return { isValid: true, status: `Server error: ${getResponse.status}` };
-      }
-
-      // 如果都失败了，再使用 tab 检测
-      return checkWithTabs(bookmark);
     } catch (getError) {
       clearTimeout(getTimeoutId);
       
-      // 检查是否是特定类型的错误
-      if (getError.message.includes('SSL') || getError.message.includes('certificate')) {
-        return { isValid: true, status: 'SSL/Certificate issue' };
+      // 处理特殊错误
+      switch (true) {
+        case getError.message.includes('SSL') || getError.message.includes('certificate'):
+          return { isValid: true, status: 'SSL/Certificate issue' };
+          
+        case getError.message.includes('CORS'):
+          return { isValid: true, status: 'CORS restricted' };
+          
+        case getError.name === 'AbortError':
+          return { isValid: false, status: 'GET Timeout' };
+          
+        case getError.message.includes('ECONNREFUSED'):
+          return { isValid: false, status: 'Connection refused' };
+          
+        case getError.message.includes('ETIMEDOUT'):
+          return { isValid: false, status: 'Connection timed out' };
+          
+        case getError.message.includes('getaddrinfo'):
+          return { isValid: false, status: 'DNS lookup failed' };
+          
+        default:
+          return { isValid: false, status: `Network error: ${getError.message}` };
       }
-      
-      if (getError.message.includes('CORS')) {
-        return { isValid: true, status: 'CORS restricted' };
-      }
-
-      // 如果是超时错误
-      if (getError.name === 'AbortError') {
-        return { isValid: false, status: 'GET Timeout' };
-      }
-
-      // 其他网络错误可能需要 tab 检测
-      return checkWithTabs(bookmark);
     }
   } catch (error) {
     clearTimeout(timeoutId);
     
-    // HEAD 请求的错误处理
     if (error.name === 'AbortError') {
       return { isValid: false, status: 'HEAD Timeout' };
     }
 
-    // 某些服务器可能不支持 HEAD 请求，直接进行 GET 请求
+    // 如果 HEAD 请求失败，直接尝试 GET 请求
     const getController = new AbortController();
     const getTimeoutId = setTimeout(() => getController.abort(), 5000);
 
@@ -269,42 +276,16 @@ async function checkBookmark(bookmark) {
         return { isValid: false, status: '404 Not Found' };
       }
 
-      return checkWithTabs(bookmark);
+      return { isValid: false, status: `Failed: ${getResponse.status}` };
     } catch (getError) {
       clearTimeout(getTimeoutId);
       
       if (getError.name === 'AbortError') {
         return { isValid: false, status: 'All requests timeout' };
       }
-
-      // 最后才使用 tab 检测
-      return checkWithTabs(bookmark);
+      
+      // 处理其他网络错误
+      return { isValid: false, status: `Error: ${getError.message}` };
     }
   }
-}
-
-// 修改使用标签页检查的函数，添加超时控制
-function checkWithTabs(bookmark) {
-  return new Promise((resolve) => {
-    const timeoutId = setTimeout(() => {
-      resolve({ isValid: false, status: 'Tab check timeout' });
-    }, 5000); // 5秒超时
-
-    chrome.tabs.create(
-      { url: bookmark.url, active: false },
-      (tab) => {
-        setTimeout(() => {
-          chrome.tabs.get(tab.id, (checkTab) => {
-            clearTimeout(timeoutId);
-            chrome.tabs.remove(tab.id);
-            const isValid = checkTab && !checkTab.url.startsWith('chrome-error://');
-            resolve({
-              isValid: isValid,
-              status: isValid ? 'OK (Tab Check)' : 'Error (Tab Check)'
-            });
-          });
-        }, 3000);
-      }
-    );
-  });
 }

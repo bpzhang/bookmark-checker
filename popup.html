@@ -107,6 +107,63 @@
       font-size: 12px;
       color: #666;
     }
+    .invalid-bookmarks-section {
+      margin: 15px 0;
+      padding: 10px;
+      background: #fff5f5;
+      border: 1px solid #ffebeb;
+      border-radius: 4px;
+    }
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .section-header h3 {
+      margin: 0;
+      color: #d32f2f;
+      font-size: 14px;
+    }
+    .danger-button {
+      background-color: #d32f2f;
+      color: white;
+      padding: 5px 10px;
+      font-size: 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .danger-button:hover {
+      background-color: #b71c1c;
+    }
+    .danger-button:disabled {
+      background-color: #ffcdd2;
+      cursor: not-allowed;
+    }
+    .invalid-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 5px;
+      border-bottom: 1px solid #ffebeb;
+    }
+    .invalid-item:last-child {
+      border-bottom: none;
+    }
+    .delete-button {
+      background-color: #ff5252;
+      color: white;
+      border: none;
+      border-radius: 3px;
+      padding: 3px 8px;
+      font-size: 11px;
+      cursor: pointer;
+      margin-left: 5px;
+    }
+    .delete-button:hover {
+      background-color: #ff1744;
+    }
   </style>
 </head>
 <body>
@@ -123,6 +180,13 @@
     <div class="progress-bar-fill"></div>
   </div>
   <div id="currentBookmark">准备开始检查...</div>
+  <div class="invalid-bookmarks-section" style="display: none;">
+    <div class="section-header">
+      <h3>无效书签列表</h3>
+      <button id="deleteAllInvalid" class="danger-button">删除所有无效书签</button>
+    </div>
+    <div id="invalidList"></div>
+  </div>
   <div id="results"></div>
   <script src="popup.js"></script>
 </body>

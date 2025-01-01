@@ -150,12 +150,13 @@ async function startBookmarkCheck(excludeDomains) {
   }
 }
 
-// 修改检查书签的函数，添加超时控制
+// 修改检查书签的函数
 async function checkBookmark(bookmark) {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 5000); // 5秒超时
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
 
   try {
+    // 首先尝试 HEAD 请求
     const response = await fetch(bookmark.url, {
       method: 'HEAD',
       signal: controller.signal,
@@ -166,19 +167,119 @@ async function checkBookmark(bookmark) {
     
     clearTimeout(timeoutId);
     
-    if (response.status === 404) {
-      return { isValid: false, status: '404 Not Found' };
-    } else if (response.ok) {
+    if (response.ok) {
       return { isValid: true, status: response.status };
-    } else {
+    }
+
+    // 如果 HEAD 请求失败，尝试 GET 请求
+    const getController = new AbortController();
+    const getTimeoutId = setTimeout(() => getController.abort(), 5000);
+
+    try {
+      const getResponse = await fetch(bookmark.url, {
+        method: 'GET',
+        signal: getController.signal,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        }
+      });
+      
+      clearTimeout(getTimeoutId);
+      
+      if (getResponse.ok) {
+        return { isValid: true, status: 'GET: ' + getResponse.status };
+      }
+
+      // 特殊状态码处理
+      if (getResponse.status === 403 || getResponse.status === 401) {
+        // 需要认证的页面通常是有效的
+        return { isValid: true, status: `Requires auth: ${getResponse.status}` };
+      }
+      
+      if (getResponse.status === 404) {
+        return { isValid: false, status: '404 Not Found' };
+      }
+      
+      if (getResponse.status === 429) {
+        // 请求过多，等待一会儿再试
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        return { isValid: true, status: 'Rate limited: 429' };
+      }
+
+      // 其他错误状态码，但可能是有效网站
+      if (getResponse.status >= 500) {
+        return { isValid: true, status: `Server error: ${getResponse.status}` };
+      }
+
+      // 如果都失败了，再使用 tab 检测
+      return checkWithTabs(bookmark);
+    } catch (getError) {
+      clearTimeout(getTimeoutId);
+      
+      // 检查是否是特定类型的错误
+      if (getError.message.includes('SSL') || getError.message.includes('certificate')) {
+        return { isValid: true, status: 'SSL/Certificate issue' };
+      }
+      
+      if (getError.message.includes('CORS')) {
+        return { isValid: true, status: 'CORS restricted' };
+      }
+
+      // 如果是超时错误
+      if (getError.name === 'AbortError') {
+        return { isValid: false, status: 'GET Timeout' };
+      }
+
+      // 其他网络错误可能需要 tab 检测
       return checkWithTabs(bookmark);
     }
   } catch (error) {
     clearTimeout(timeoutId);
+    
+    // HEAD 请求的错误处理
     if (error.name === 'AbortError') {
-      return { isValid: false, status: 'Timeout' };
+      return { isValid: false, status: 'HEAD Timeout' };
     }
-    return checkWithTabs(bookmark);
+
+    // 某些服务器可能不支持 HEAD 请求，直接进行 GET 请求
+    const getController = new AbortController();
+    const getTimeoutId = setTimeout(() => getController.abort(), 5000);
+
+    try {
+      const getResponse = await fetch(bookmark.url, {
+        method: 'GET',
+        signal: getController.signal,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        }
+      });
+      
+      clearTimeout(getTimeoutId);
+      
+      if (getResponse.ok) {
+        return { isValid: true, status: 'GET: ' + getResponse.status };
+      }
+      
+      // 处理特殊状态码
+      if ([401, 403, 429, 500, 502, 503, 504].includes(getResponse.status)) {
+        return { isValid: true, status: `Service available: ${getResponse.status}` };
+      }
+      
+      if (getResponse.status === 404) {
+        return { isValid: false, status: '404 Not Found' };
+      }
+
+      return checkWithTabs(bookmark);
+    } catch (getError) {
+      clearTimeout(getTimeoutId);
+      
+      if (getError.name === 'AbortError') {
+        return { isValid: false, status: 'All requests timeout' };
+      }
+
+      // 最后才使用 tab 检测
+      return checkWithTabs(bookmark);
+    }
   }
 }
 

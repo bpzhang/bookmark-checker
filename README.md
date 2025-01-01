@@ -33,7 +33,7 @@ A Chrome extension to check and manage your bookmarks efficiently.
 4. Monitor progress and results in real-time
 5. Manage invalid bookmarks as needed
 
-## Technical Details 
+## Technical Details
 
 - Built with Chrome Extensions Manifest V3
 - Uses modern JavaScript features
@@ -41,7 +41,7 @@ A Chrome extension to check and manage your bookmarks efficiently.
 - Real-time progress updates using message passing
 - Responsive UI with progress tracking
 
-## Permissions Required 
+## Permissions Required
 
 - `bookmarks`: For accessing and managing bookmarks
 - `tabs`: For advanced URL validation
@@ -49,6 +49,6 @@ A Chrome extension to check and manage your bookmarks efficiently.
 - `notifications`: For system notifications
 - `background`: For background processing
 
-## Contributing 
+## Contributing
 
 Feel free to submit issues and enhancement requests!

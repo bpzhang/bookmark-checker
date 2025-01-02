@@ -3,9 +3,10 @@
     "name": "Bookmark Checker",
     "version": "1.0",
     "description": "Check if bookmarks are valid",
+    "author": "bpzhang",
     "permissions": [
         "bookmarks",
-        "tabs",
+        "tabs", 
         "notifications",
         "alarms",
         "background"

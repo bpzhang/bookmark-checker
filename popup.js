@@ -1,5 +1,9 @@
 let updateInterval = null;
 
+function getMessage(key, substitutions) {
+  return chrome.i18n.getMessage(key, substitutions);
+}
+
 // 添加页面加载时的状态检查
 document.addEventListener('DOMContentLoaded', async () => {
   const response = await chrome.runtime.sendMessage({ action: 'getProgress' });
@@ -8,7 +12,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const button = document.getElementById('checkBookmarks');
     const stopButton = document.getElementById('stopButton');
     button.disabled = true;
-    button.textContent = '检查中...';
+    button.textContent = getMessage('checking');
     stopButton.style.display = 'block';
     startProgressUpdate();
   }
@@ -32,10 +36,10 @@ document.getElementById('checkBookmarks').addEventListener('click', async () => 
   
   // 重置停止按钮状态
   stopButton.disabled = false;
-  stopButton.textContent = '停止检查';
+  stopButton.textContent = getMessage('stopChecking');
   
   button.disabled = true;
-  button.textContent = '检查中...';
+  button.textContent = getMessage('checking');
   stopButton.style.display = 'block';
   
   // 开始检查
@@ -52,7 +56,7 @@ document.getElementById('checkBookmarks').addEventListener('click', async () => 
 document.getElementById('stopButton').addEventListener('click', () => {
   chrome.runtime.sendMessage({ action: 'stopChecking' });
   document.getElementById('stopButton').disabled = true;
-  document.getElementById('stopButton').textContent = '正在停止...';
+  document.getElementById('stopButton').textContent = getMessage('stopping');
 });
 
 function startProgressUpdate() {
@@ -84,10 +88,10 @@ function updateUI(response) {
   if (!isChecking) {
     clearInterval(updateInterval);
     button.disabled = false;
-    button.textContent = '重新检查';
+    button.textContent = getMessage('checkAgain');
     stopButton.style.display = 'none';
     stopButton.disabled = false;
-    stopButton.textContent = '停止检查';
+    stopButton.textContent = getMessage('stopChecking');
   }
 
   // 更新进度
@@ -98,12 +102,13 @@ function updateUI(response) {
   
   // 更新当前检查状态
   if (progress.currentBookmark) {
-    currentBookmark.textContent = `正在检查: ${progress.currentBookmark}`;
+    currentBookmark.textContent = getMessage('checkingBookmark', [progress.currentBookmark]);
   } else if (!isChecking && progress.checked > 0) {
-    currentBookmark.innerHTML = `检查完成!<br>
-      <span style="color: #4CAF50;">✓ 有效: ${progress.validCount}</span> | 
-      <span style="color: #f44336;">✗ 无效: ${progress.invalidCount}</span> | 
-      <span style="color: #2196F3;">⊘ 已排除: ${progress.excludedCount}</span>`;
+    currentBookmark.innerHTML = getMessage('checkComplete', [
+      progress.validCount,
+      progress.invalidCount,
+      progress.excludedCount
+    ]);
   }
 
   // 更新结果列表
@@ -133,11 +138,11 @@ function createResultDiv(bookmark, isValid, status) {
   resultDiv.innerHTML = `
     <div>
       ${bookmark.title}
-      <a href="${bookmark.url}" target="_blank" class="action-link">打开链接</a>
+      <a href="${bookmark.url}" target="_blank" class="action-link">${getMessage('openLink')}</a>
     </div>
     <div class="bookmark-url">${bookmark.url}</div>
     <div style="font-size: 12px;">
-      ${isValid ? '✓ 有效' : '✗ 无效'} - ${status}
+      ${isValid ? getMessage('valid') : getMessage('invalid')} - ${getMessage('status', [status])}
     </div>
   `;
   return resultDiv;
@@ -155,9 +160,9 @@ function updateInvalidList(invalidResults) {
       <div>
         <div>${result.bookmark.title}</div>
         <div class="bookmark-url">${result.bookmark.url}</div>
-        <div style="font-size: 11px; color: #666;">状态: ${result.status}</div>
+        <div style="font-size: 11px; color: #666;">${getMessage('status', [result.status])}</div>
       </div>
-      <button class="delete-button" data-bookmark-id="${result.bookmark.id}">删除</button>
+      <button class="delete-button" data-bookmark-id="${result.bookmark.id}">${getMessage('delete')}</button>
     `;
 
     // 添加删除按钮事件
@@ -188,7 +193,7 @@ async function deleteBookmark(id, element) {
 document.getElementById('deleteAllInvalid').addEventListener('click', async () => {
   const deleteButton = document.getElementById('deleteAllInvalid');
   deleteButton.disabled = true;
-  deleteButton.textContent = '正在删除...';
+  deleteButton.textContent = getMessage('deleting');
 
   try {
     const response = await chrome.runtime.sendMessage({ action: 'getProgress' });
@@ -204,6 +209,6 @@ document.getElementById('deleteAllInvalid').addEventListener('click', async () =
     console.error('Error deleting invalid bookmarks:', error);
   } finally {
     deleteButton.disabled = false;
-    deleteButton.textContent = '删除所有无效书签';
+    deleteButton.textContent = getMessage('deleteAllInvalid');
   }
 });

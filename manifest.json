@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
-    "name": "Bookmark Checker",
+    "name": "__MSG_appName__",
     "version": "1.0",
-    "description": "Check if bookmarks are valid",
+    "description": "__MSG_appDescription__",
     "author": "bpzhang",
     "permissions": [
         "bookmarks",

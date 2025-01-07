@@ -1,0 +1,111 @@
+{
+  "appName": {
+    "message": "Bookmark Checker",
+    "description": "The name of the extension"
+  },
+  "appDescription": {
+    "message": "Check if your bookmarks are still valid",
+    "description": "The description of the extension"
+  },
+  "checkBookmarks": {
+    "message": "Check Bookmarks",
+    "description": "Button text to start checking"
+  },
+  "stopChecking": {
+    "message": "Stop Checking",
+    "description": "Button text to stop checking"
+  },
+  "stopping": {
+    "message": "Stopping...",
+    "description": "Text shown when stopping"
+  },
+  "checking": {
+    "message": "Checking...",
+    "description": "Text shown when checking"
+  },
+  "checkAgain": {
+    "message": "Check Again",
+    "description": "Button text to check again"
+  },
+  "excludeDomainsTitle": {
+    "message": "Exclude Domains (one domain per line, e.g.: example.com)",
+    "description": "Title for exclude domains section"
+  },
+  "excludeDomainsPlaceholder": {
+    "message": "Enter domains to exclude, one per line",
+    "description": "Placeholder for exclude domains textarea"
+  },
+  "checked": {
+    "message": "Checked",
+    "description": "Text for checked count"
+  },
+  "valid": {
+    "message": "Valid",
+    "description": "Text for valid bookmarks"
+  },
+  "invalid": {
+    "message": "Invalid",
+    "description": "Text for invalid bookmarks"
+  },
+  "excluded": {
+    "message": "Excluded",
+    "description": "Text for excluded bookmarks"
+  },
+  "readyToCheck": {
+    "message": "Ready to check...",
+    "description": "Text shown before checking starts"
+  },
+  "checkingBookmark": {
+    "message": "Checking: $BOOKMARK$",
+    "placeholders": {
+      "bookmark": {
+        "content": "$1"
+      }
+    },
+    "description": "Text shown when checking a specific bookmark"
+  },
+  "checkComplete": {
+    "message": "Check complete!\nValid: $VALID$\nInvalid: $INVALID$\nExcluded: $EXCLUDED$",
+    "placeholders": {
+      "valid": {
+        "content": "$1"
+      },
+      "invalid": {
+        "content": "$2"
+      },
+      "excluded": {
+        "content": "$3"
+      }
+    },
+    "description": "Text shown when check is complete"
+  },
+  "invalidBookmarksList": {
+    "message": "Invalid Bookmarks List",
+    "description": "Title for invalid bookmarks list"
+  },
+  "deleteAllInvalid": {
+    "message": "Delete All Invalid",
+    "description": "Button text to delete all invalid bookmarks"
+  },
+  "deleting": {
+    "message": "Deleting...",
+    "description": "Text shown when deleting"
+  },
+  "openLink": {
+    "message": "Open Link",
+    "description": "Text for open link action"
+  },
+  "delete": {
+    "message": "Delete",
+    "description": "Text for delete action"
+  },
+  "status": {
+    "message": "Status: $STATUS$",
+    "placeholders": {
+      "status": {
+        "content": "$1"
+      }
+    },
+    "description": "Text for status display"
+  }
+} 

@@ -1,8 +1,111 @@
 {
-    "extensionName": {
-      "message": "书签检查器"
+  "appName": {
+    "message": "书签检查器",
+    "description": "扩展名称"
+  },
+  "appDescription": {
+    "message": "检查您的书签是否仍然有效",
+    "description": "扩展描述"
+  },
+  "checkBookmarks": {
+    "message": "检查书签",
+    "description": "开始检查按钮文本"
+  },
+  "stopChecking": {
+    "message": "停止检查",
+    "description": "停止检查按钮文本"
+  },
+  "stopping": {
+    "message": "正在停止...",
+    "description": "停止时显示的文本"
+  },
+  "checking": {
+    "message": "检查中...",
+    "description": "检查时显示的文本"
+  },
+  "checkAgain": {
+    "message": "重新检查",
+    "description": "重新检查按钮文本"
+  },
+  "excludeDomainsTitle": {
+    "message": "排除域名 (每行一个域名，例如: example.com)",
+    "description": "排除域名区域标题"
+  },
+  "excludeDomainsPlaceholder": {
+    "message": "输入要排除的域名，每行一个",
+    "description": "排除域名输入框占位符"
+  },
+  "checked": {
+    "message": "已检查",
+    "description": "已检查数量文本"
+  },
+  "valid": {
+    "message": "有效",
+    "description": "有效书签文本"
+  },
+  "invalid": {
+    "message": "无效",
+    "description": "无效书签文本"
+  },
+  "excluded": {
+    "message": "已排除",
+    "description": "已排除书签文本"
+  },
+  "readyToCheck": {
+    "message": "准备开始检查...",
+    "description": "开始检查前显示的文本"
+  },
+  "checkingBookmark": {
+    "message": "正在检查: $BOOKMARK$",
+    "placeholders": {
+      "bookmark": {
+        "content": "$1"
+      }
     },
-    "extensionDescription": {
-      "message": "检查Chrome书签是否有效"
-    }
+    "description": "检查特定书签时显示的文本"
+  },
+  "checkComplete": {
+    "message": "检查完成!\n有效: $VALID$\n无效: $INVALID$\n已排除: $EXCLUDED$",
+    "placeholders": {
+      "valid": {
+        "content": "$1"
+      },
+      "invalid": {
+        "content": "$2"
+      },
+      "excluded": {
+        "content": "$3"
+      }
+    },
+    "description": "检查完成时显示的文本"
+  },
+  "invalidBookmarksList": {
+    "message": "无效书签列表",
+    "description": "无效书签列表标题"
+  },
+  "deleteAllInvalid": {
+    "message": "删除所有无效书签",
+    "description": "删除所有无效书签按钮文本"
+  },
+  "deleting": {
+    "message": "正在删除...",
+    "description": "删除时显示的文本"
+  },
+  "openLink": {
+    "message": "打开链接",
+    "description": "打开链接操作文本"
+  },
+  "delete": {
+    "message": "删除",
+    "description": "删除操作文本"
+  },
+  "status": {
+    "message": "状态: $STATUS$",
+    "placeholders": {
+      "status": {
+        "content": "$1"
+      }
+    },
+    "description": "状态显示文本"
   }
+}

@@ -192,6 +192,34 @@
     .stat-value.neutral {
       color: #2196F3;
     }
+    .error-types-section {
+      margin: 10px 0;
+      padding: 10px;
+      background: #f8f9fa;
+      border-radius: 4px;
+      border: 1px solid #e9ecef;
+    }
+    .error-types-section h4 {
+      margin: 0 0 10px 0;
+      font-size: 13px;
+      color: #495057;
+    }
+    .error-types-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+    .error-type-item {
+      font-size: 12px;
+      color: #495057;
+    }
+    .error-type-label {
+      margin-right: 5px;
+    }
+    .error-type-value {
+      font-weight: bold;
+      color: #dc3545;
+    }
   </style>
 </head>
 <body>
@@ -216,6 +244,35 @@
     <div class="stat-item">
       <span class="stat-label">已排除:</span>
       <span id="excludedCount" class="stat-value neutral">0</span>
+    </div>
+  </div>
+  <div class="error-types-section">
+    <h4>错误类型统计</h4>
+    <div class="error-types-grid">
+      <div class="error-type-item">
+        <span class="error-type-label">404错误:</span>
+        <span id="notFoundCount" class="error-type-value">0</span>
+      </div>
+      <div class="error-type-item">
+        <span class="error-type-label">服务器错误:</span>
+        <span id="serverErrorCount" class="error-type-value">0</span>
+      </div>
+      <div class="error-type-item">
+        <span class="error-type-label">超时错误:</span>
+        <span id="timeoutCount" class="error-type-value">0</span>
+      </div>
+      <div class="error-type-item">
+        <span class="error-type-label">网络错误:</span>
+        <span id="networkCount" class="error-type-value">0</span>
+      </div>
+      <div class="error-type-item">
+        <span class="error-type-label">DNS错误:</span>
+        <span id="dnsCount" class="error-type-value">0</span>
+      </div>
+      <div class="error-type-item">
+        <span class="error-type-label">其他错误:</span>
+        <span id="otherCount" class="error-type-value">0</span>
+      </div>
     </div>
   </div>
   <div class="progress-bar">

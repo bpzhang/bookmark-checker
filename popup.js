@@ -85,6 +85,14 @@ function updateUI(response) {
   document.getElementById('invalidCount').textContent = progress.invalidCount;
   document.getElementById('excludedCount').textContent = progress.excludedCount;
 
+  // 更新错误类型统计
+  document.getElementById('notFoundCount').textContent = progress.errorTypes.notFound;
+  document.getElementById('serverErrorCount').textContent = progress.errorTypes.serverError;
+  document.getElementById('timeoutCount').textContent = progress.errorTypes.timeout;
+  document.getElementById('networkCount').textContent = progress.errorTypes.network;
+  document.getElementById('dnsCount').textContent = progress.errorTypes.dns;
+  document.getElementById('otherCount').textContent = progress.errorTypes.other;
+
   if (!isChecking) {
     clearInterval(updateInterval);
     button.disabled = false;

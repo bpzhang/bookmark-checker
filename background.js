@@ -10,7 +10,15 @@ let checkingStatus = {
     excludedCount: 0,
     currentBookmark: '',
     results: [],
-    lastResults: []
+    lastResults: [],
+    errorTypes: {
+      notFound: 0,      // 404错误
+      serverError: 0,   // 500系列错误
+      timeout: 0,       // 超时
+      network: 0,       // 网络错误
+      dns: 0,          // DNS错误
+      other: 0         // 其他错误
+    }
   }
 };
 
@@ -35,7 +43,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         excludedCount: 0,
         currentBookmark: '',
         results: [],
-        lastResults: []
+        lastResults: [],
+        errorTypes: {
+          notFound: 0,      // 404错误
+          serverError: 0,   // 500系列错误
+          timeout: 0,       // 超时
+          network: 0,       // 网络错误
+          dns: 0,          // DNS错误
+          other: 0         // 其他错误
+        }
       }
     };
     Promise.resolve().then(() => startBookmarkCheck(request.excludeDomains));
@@ -195,6 +211,7 @@ async function checkBookmark(bookmark) {
           return { isValid: true, status: `Requires auth: ${getResponse.status}` };
           
         case getResponse.status === 404:
+          checkingStatus.progress.errorTypes.notFound++;
           return { isValid: false, status: '404 Not Found' };
           
         case getResponse.status === 429:
@@ -202,22 +219,23 @@ async function checkBookmark(bookmark) {
           return { isValid: true, status: 'Rate limited: 429' };
           
         case getResponse.status >= 500:
+          checkingStatus.progress.errorTypes.serverError++;
           return { isValid: true, status: `Server error: ${getResponse.status}` };
           
         case [301, 302, 303, 307, 308].includes(getResponse.status):
-          // 处理重定向
           if (getResponse.headers.get('location')) {
             return { isValid: true, status: `Redirect: ${getResponse.status}` };
           }
+          checkingStatus.progress.errorTypes.other++;
           return { isValid: false, status: `Invalid redirect: ${getResponse.status}` };
           
         default:
+          checkingStatus.progress.errorTypes.other++;
           return { isValid: false, status: `Unexpected status: ${getResponse.status}` };
       }
     } catch (getError) {
       clearTimeout(getTimeoutId);
       
-      // 处理特殊错误
       switch (true) {
         case getError.message.includes('SSL') || getError.message.includes('certificate'):
           return { isValid: true, status: 'SSL/Certificate issue' };
@@ -226,18 +244,23 @@ async function checkBookmark(bookmark) {
           return { isValid: true, status: 'CORS restricted' };
           
         case getError.name === 'AbortError':
+          checkingStatus.progress.errorTypes.timeout++;
           return { isValid: false, status: 'GET Timeout' };
           
         case getError.message.includes('ECONNREFUSED'):
+          checkingStatus.progress.errorTypes.network++;
           return { isValid: false, status: 'Connection refused' };
           
         case getError.message.includes('ETIMEDOUT'):
+          checkingStatus.progress.errorTypes.timeout++;
           return { isValid: false, status: 'Connection timed out' };
           
         case getError.message.includes('getaddrinfo'):
+          checkingStatus.progress.errorTypes.dns++;
           return { isValid: false, status: 'DNS lookup failed' };
           
         default:
+          checkingStatus.progress.errorTypes.other++;
           return { isValid: false, status: `Network error: ${getError.message}` };
       }
     }
@@ -245,10 +268,10 @@ async function checkBookmark(bookmark) {
     clearTimeout(timeoutId);
     
     if (error.name === 'AbortError') {
+      checkingStatus.progress.errorTypes.timeout++;
       return { isValid: false, status: 'HEAD Timeout' };
     }
 
-    // 如果 HEAD 请求失败，直接尝试 GET 请求
     const getController = new AbortController();
     const getTimeoutId = setTimeout(() => getController.abort(), 5000);
 
@@ -267,24 +290,29 @@ async function checkBookmark(bookmark) {
         return { isValid: true, status: 'GET: ' + getResponse.status };
       }
       
-      // 处理特殊状态码
       if ([401, 403, 429, 500, 502, 503, 504].includes(getResponse.status)) {
+        if (getResponse.status >= 500) {
+          checkingStatus.progress.errorTypes.serverError++;
+        }
         return { isValid: true, status: `Service available: ${getResponse.status}` };
       }
       
       if (getResponse.status === 404) {
+        checkingStatus.progress.errorTypes.notFound++;
         return { isValid: false, status: '404 Not Found' };
       }
 
+      checkingStatus.progress.errorTypes.other++;
       return { isValid: false, status: `Failed: ${getResponse.status}` };
     } catch (getError) {
       clearTimeout(getTimeoutId);
       
       if (getError.name === 'AbortError') {
+        checkingStatus.progress.errorTypes.timeout++;
         return { isValid: false, status: 'All requests timeout' };
       }
       
-      // 处理其他网络错误
+      checkingStatus.progress.errorTypes.network++;
       return { isValid: false, status: `Error: ${getError.message}` };
     }
   }

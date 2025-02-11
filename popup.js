@@ -127,7 +127,10 @@ function updateUI(response) {
       result.isValid,
       result.status
     );
-    results.insertBefore(resultDiv, results.firstChild);
+    // 只有当 resultDiv 不为 null 时（即无效书签）才添加到显示列表
+    if (resultDiv) {
+      results.insertBefore(resultDiv, results.firstChild);
+    }
   }
 
   // 如果检查完成且有无效书签，显示无效书签列表
@@ -141,19 +144,46 @@ function updateUI(response) {
 }
 
 function createResultDiv(bookmark, isValid, status) {
+  // 如果书签有效，不创建显示元素
+  if (isValid) {
+    return null;
+  }
+
   const resultDiv = document.createElement('div');
-  resultDiv.className = isValid ? 'valid' : 'invalid';
+  resultDiv.className = 'result-item invalid';
+  
+  // 获取错误类型标记
+  const errorType = getErrorTypeTag(status);
+  
   resultDiv.innerHTML = `
     <div>
       ${bookmark.title}
+      <span class="error-tag">${errorType}</span>
       <a href="${bookmark.url}" target="_blank" class="action-link">${getMessage('openLink')}</a>
     </div>
     <div class="bookmark-url">${bookmark.url}</div>
-    <div style="font-size: 12px;">
-      ${isValid ? getMessage('valid') : getMessage('invalid')} - ${getMessage('status', [status])}
+    <div style="font-size: 12px; color: #666;">
+      ${getMessage('status', [status])}
     </div>
   `;
   return resultDiv;
+}
+
+// 添加获取错误类型标记的函数
+function getErrorTypeTag(status) {
+  if (status.includes('404')) {
+    return '404';
+  } else if (status.includes('Timeout')) {
+    return '超时';
+  } else if (status.includes('DNS')) {
+    return 'DNS错误';
+  } else if (status.includes('Connection refused')) {
+    return '连接失败';
+  } else if (status.includes('Server error')) {
+    return '服务器错误';
+  } else {
+    return '未知错误';
+  }
 }
 
 // 添加更新无效书签列表的函数
@@ -164,9 +194,16 @@ function updateInvalidList(invalidResults) {
   invalidResults.forEach(result => {
     const item = document.createElement('div');
     item.className = 'invalid-item';
+    
+    // 获取错误类型标记
+    const errorType = getErrorTypeTag(result.status);
+    
     item.innerHTML = `
       <div>
-        <div>${result.bookmark.title}</div>
+        <div>
+          ${result.bookmark.title}
+          <span class="error-tag">${errorType}</span>
+        </div>
         <div class="bookmark-url">${result.bookmark.url}</div>
         <div style="font-size: 11px; color: #666;">${getMessage('status', [result.status])}</div>
       </div>

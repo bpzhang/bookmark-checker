@@ -48,8 +48,16 @@
     }
     #results {
       margin-top: 10px;
-      max-height: 400px;
+      max-height: 300px;
       overflow-y: auto;
+      border-top: 1px solid #eee;
+    }
+    .result-item {
+      padding: 8px;
+      border-bottom: 1px solid #eee;
+    }
+    .result-item.invalid {
+      background-color: #fff5f5;
     }
     .progress-bar {
       width: 100%;
@@ -219,6 +227,15 @@
     .error-type-value {
       font-weight: bold;
       color: #dc3545;
+    }
+    .error-tag {
+      display: inline-block;
+      padding: 2px 6px;
+      background-color: #ffebee;
+      color: #d32f2f;
+      border-radius: 3px;
+      font-size: 11px;
+      margin-left: 5px;
     }
   </style>
 </head>

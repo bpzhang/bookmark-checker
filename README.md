@@ -17,6 +17,7 @@ A Chrome extension to check and manage your bookmarks efficiently.
   - Delete individual invalid bookmarks
   - Batch delete all invalid bookmarks
   - Real-time statistics display
+  - Displays error types
 
 ## Installation
 
@@ -37,9 +38,26 @@ A Chrome extension to check and manage your bookmarks efficiently.
 
 - Built with Chrome Extensions Manifest V3
 - Uses modern JavaScript features
-- Implements both HEAD request and tab-based checking methods
+- Implements both HEAD request and tab-based checking methods (HEAD and GET)
 - Real-time progress updates using message passing
 - Responsive UI with progress tracking
+- Utilizes internationalization (i18n) for multiple languages
+
+## Error Types
+
+The extension categorizes bookmark errors into the following types:
+
+- 404 Not Found
+- Server Error (500 series)
+- Timeout
+- Network Error
+- DNS Error
+- Other Errors
+
+## Configuration
+
+- `maxConcurrent`: Configures the maximum number of concurrent bookmark checks in [background.js](background.js).
+- `batchSize`: Configures the number of bookmarks processed in each batch in [background.js](background.js).
 
 ## Permissions Required
 
